@@ -110,9 +110,9 @@ def load_tweepy_codes(path):
 	file = open(path)
 	for i in range(0,4):
 		line = file.readline()
-		tmp=line.split(":")
+		tmp=line.split(":") #format key ':' value
 		#print tmp
-		codes[tmp[0]]=tmp[1]
+		codes[i]=tmp[1]
 	return codes
 
                          
