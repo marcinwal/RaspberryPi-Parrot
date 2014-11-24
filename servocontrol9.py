@@ -56,9 +56,8 @@ def take_a_photo(path):
                 camera.stop_preview()
 
 
-def easy_shot(path,camera):
-	#camera.resolution(width,heigth)
-	camera.capture(path)
+#def easy_shot(path,camera):
+#	camera.capture(path,resize=(640,480))
 
 
 def compare(camera):
@@ -99,8 +98,8 @@ while count < 10:
 		im1 = im2
 		shottime = strftime("%Y-%m-%d %H:%M:%S",gmtime())
 		
-		camera.capture(path)
-
+		#easy_shot(shottime,camera)
+		camera.capture(shottime+".bmp")
 		count += 1
 		break;
 	sleep(30)

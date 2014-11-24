@@ -57,12 +57,11 @@ def take_a_photo(path):
 
 
 def easy_shot(path,camera):
-	#camera.resolution(width,heigth)
-	camera.capture(path)
+	camera.capture(path,resize=(640,480))
 
 
 def compare(camera):
-	camera.resolution(res1,res2)
+	camera.resolution=(res1,res2)
 	stream = io.BytesIO()
 	camera.capture(stream,format='bmp') 
 	stream.seek(0)
@@ -71,7 +70,7 @@ def compare(camera):
 	stream.close()
 	return im,buffer
 
-def count_diff(buffer1,buffer2):
+def count_diff():
 	diff = 0 
 	for x in xrange(0,res1):
 	   for y in xrange(0,res2):
@@ -91,16 +90,15 @@ count = 0
 
 im1,buffer1 = compare(camera)
 sleep(10)
-
 while count < 10:
 	im2,buffer2 = compare(camera)	
-	if count_diff(buffer1,buffer2) > trigger:
+	if count_diff() > trigger:
 		buffer1 = buffer2
 		im1 = im2
 		shottime = strftime("%Y-%m-%d %H:%M:%S",gmtime())
 		
-		camera.capture(path)
-
+		easy_shot(shottime+".jpg",camera)
+		#camera.capture(shottime+".bmp")
 		count += 1
 		break;
 	sleep(30)
