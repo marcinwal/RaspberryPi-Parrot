@@ -13,6 +13,7 @@ treshold = 20 # trigger for change detection
 res1 = 100  # x resolution for compare
 res2 = 75   # y resolution for compare	
 trigger = 100
+tweepy_codes_path="tweepy_codes.txt"
 
 
 def start():
@@ -104,10 +105,19 @@ def detect_and_save(how_many=10):
 			#break
 		sleep(10)
 
-
+def load_tweepy_codes(path):
+	codes={}
+	file = open(path)
+	for i in range(0,4):
+		line = file.readline()
+		tmp=line.split(":")
+		#print tmp
+		codes[tmp[0]]=tmp[1]
+	return codes
 
                          
-detect_and_save(5)
-
+#detect_and_save(5)
+codes = load_tweepy_codes(tweepy_codes_path)
+print codes
 
                 
