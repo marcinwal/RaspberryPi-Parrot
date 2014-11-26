@@ -7,6 +7,7 @@ import io
 import sys
 from PIL import Image
 import math,operator
+import tweepy
 
 #import numpy as np
 
@@ -26,7 +27,8 @@ def start():
 
         
 def call_command(servo,pulsewidth):
-        os.system("echo "+str(servo)+"="+str(pulsewidth)+"> /dev/servoblaster")
+	print("echo "+str(servo)+"="+pulsewidth+" > /dev/servoblaster")
+        os.system("echo "+str(servo)+"="+pulsewidth+" > /dev/servoblaster")
 
 def servo_adjust_plus(servo,adjust): #+10,+20
         os.system("echo "+servo+"=+"+adjust+" > /dev/servoblaster")
@@ -50,7 +52,15 @@ def move_tilt_pct():
         command2=(raw_input("how much to move servo 1  in pct "))
         servo_adjust_pct("1",command2)
         kill_servos()
-                        
+
+def move_tilt_value():
+	start()
+	command=(raw_input("how much to move the servo 0 in pts "))
+	print(command)
+	call_command(0,command)
+	command=(raw_input("how much to move the servo 1 in pts "))
+	call_command(1,command)
+	kill_servos()
 
 def take_a_photo(path):
         with picamera.PiCamera() as camera:
@@ -59,7 +69,7 @@ def take_a_photo(path):
                 camera.capture(path)
                 camera.stop_preview()
 
-def detect_if_move(old_path,r1=640,r2=480):
+def detect_if_move(old_path):
 #loads old picture takes a new one, compares with trshold and b/e and sends a signal
 #should be the same resolution
 
@@ -153,6 +163,8 @@ def load_tweepy_codes(path):
 
 
 move_tilt_pct()
+#move_tilt_value()
+sleep(3)
 diff, path = detect_if_move("test2.jpg")
 print(diff)
  
