@@ -4,8 +4,11 @@ from time import gmtime,strftime,sleep
 import os
 import picamera
 import io
+import sys
 from PIL import Image
+import math,operator
 
+import numpy as np
 
 width = 1280
 heigth = 960
@@ -56,6 +59,34 @@ def take_a_photo(path):
                 camera.capture(path)
                 camera.stop_preview()
 
+def detect_if_move(old_path,r1=640,r2=480):
+#loads old picture takes a new one, compares with trshold and b/e and sends a signal
+#should be the same resolution
+
+	p1 = Image.open(old_path)
+	tmp = "test.jpg"
+ 	w,h = p1.size
+
+	#picture.show()
+
+	with picamera.PiCamera() as camera:
+		camera.resolution = (w,h)
+		sleep(2)
+		camera.capture(tmp)
+	p2 = Image.open(tmp)	
+
+	print("w,h %i %i" % (w,h))
+
+	#diff = np.subtract(p1,p2)
+	#total = np.sum(diff)
+
+	h1=p1.histogram()
+	h2=p2.histogram()
+
+	rms = math.sqrt(reduce(operator.add,
+		map(lambda a,b: (a-b)**2, h1,h2))/len(h1))
+
+	return (rms,tmp)
 
 def easy_shot(path,camera):
 	camera.capture(path,resize=(1024,768))
@@ -117,7 +148,10 @@ def load_tweepy_codes(path):
 
                          
 #detect_and_save(5)
-codes = load_tweepy_codes(tweepy_codes_path)
-print codes
+#codes = load_tweepy_codes(tweepy_codes_path)
+#print codes
 
+diff, path = detect_if_move("test2.jpg")
+print(diff)
+ 
                 
