@@ -8,7 +8,7 @@ import sys
 from PIL import Image
 import math,operator
 
-import numpy as np
+#import numpy as np
 
 width = 1280
 heigth = 960
@@ -151,6 +151,8 @@ def load_tweepy_codes(path):
 #codes = load_tweepy_codes(tweepy_codes_path)
 #print codes
 
+
+move_tilt_pct()
 diff, path = detect_if_move("test2.jpg")
 print(diff)
  
