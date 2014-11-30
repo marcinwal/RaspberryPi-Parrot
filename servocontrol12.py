@@ -18,7 +18,7 @@ res1 = 100  # x resolution for compare
 res2 = 75   # y resolution for compare	
 trigger = 100
 tweepy_codes_path="tweepy_codes.txt"
-
+how_often_detection_test=6 #testing motion
 
 def start():
         print("starting servo")
@@ -69,17 +69,20 @@ def take_a_photo(path):
                 camera.capture(path)
                 camera.stop_preview()
 
-def detect_if_move(old_path):
+
+
 #loads old picture takes a new one, compares with trshold and b/e and sends a signal
 #should be the same resolution
 
-	p1 = Image.open(old_path)
+def detect_if_move(old_path):
+
+	p1 = Image.open(old_path) #loading pattern
 	tmp = "test.jpg"
  	w,h = p1.size
 
 	#picture.show()
 
-	with picamera.PiCamera() as camera:
+	with picamera.PiCamera() as camera:  #taking new shot
 		camera.resolution = (w,h)
 		sleep(2)
 		camera.capture(tmp)
@@ -102,6 +105,13 @@ def easy_shot(path,camera):
 	camera.capture(path,resize=(1024,768))
 	print"taking a picture %s \n" % path 
 
+def shot_to_publish(path,w=1024,h=768):
+	with picamera.PiCamera() as camera:  #taking new shot
+		camera.resolution = (w,h)
+		sleep(2)
+		camera.capture(path)
+		
+
 
 def compare(camera):
 	camera.resolution=(res1,res2)
@@ -123,7 +133,7 @@ def count_diff(buffer):
 	return diff
 
   
-                
+#detection of the move using stream                
 def detect_and_save(how_many=10):
 
 	camera = picamera.PiCamera()
@@ -156,16 +166,47 @@ def load_tweepy_codes(path):
 		codes[tmp[0]]=tmp[1]
 	return codes
 
+def update_twitter(photo_path,comment):
+	api.update_with_media(photo_path,status=comment)
+	
                          
-#detect_and_save(5)
-#codes = load_tweepy_codes(tweepy_codes_path)
-#print codes
+
+codes = load_tweepy_codes(tweepy_codes_path)
 
 
-move_tilt_pct()
+api_key = codes['Consumer Key (API Key)'].strip()
+api_secret = codes['Consumer Secret (API Secret)'].strip()
+access_token = codes['Access Token'].strip()
+token_secret = codes['Access Token Secret'].strip()
+
+
+auth = tweepy.OAuthHandler(api_key,api_secret)
+auth.set_access_token(access_token,token_secret)
+api = tweepy.API(auth)
+my_twitter = api.me()
+
+print my_twitter.name, "is connected"
+tweet_text=['Test shot of birds station',
+	    'Move detected with rPi']
+
+
+#move_tilt_pct()
 #move_tilt_value()
-sleep(3)
-diff, path = detect_if_move("test2.jpg")
-print(diff)
- 
-                
+
+go=1
+
+pattern = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
+shot_to_publish(pattern)
+
+while go==1:
+	diff, path = detect_if_move(pattern)	
+        sleep(how_often_detection_test)
+	print(diff)
+	if diff > 3000:
+		shot_name = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
+                shot_to_publish(shot_name)
+		#adding publishing to tweeter
+	
+
+	
+
