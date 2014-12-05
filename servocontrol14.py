@@ -179,8 +179,8 @@ def load_servos_info_from_page(page):
 	html = sock.read()
 	sock.close()
 
-	serv1 = re.findall("Servo1:[-+]?\d+",html)
-	serv2 = re.findall("Servo2:[-+]?\d+",html)
+	serv1 = re.findall("Servo1:[-+%]?\d+",html)
+	serv2 = re.findall("Servo2:[-+%]?\d+",html)
 
 	s1 = serv1[-1].split(':')
 	s2 = serv2[-1].split(':')
