@@ -8,6 +8,8 @@ import sys
 from PIL import Image
 import math,operator
 import tweepy
+import urllib
+import re
 
 #import numpy as np
 
@@ -172,10 +174,28 @@ def update_twitter(photo_path,comment):
 	api.update_with_media(photo_path,status=comment)
 	
                          
+def load_servos_info_from_page(page):
+	sock = urllib.urlopen(page)
+	html = sock.read()
+	sock.close()
+
+	serv1 = re.findall("Servo1:[-+]?\d+",html)
+	serv2 = re.findall("Servo2:[-+]?\d+",html)
+
+	s1 = serv1[-1].split(':')
+	s2 = serv2[-1].split(':')
+
+	return s1[1],s2[1]
+
+
+
+
+
+
 
 codes = load_tweepy_codes(tweepy_codes_path)
 
-
+servo_page = "http://ratingpedia.eu/parrots/"
 api_key = codes['Consumer Key (API Key)'].strip()
 api_secret = codes['Consumer Secret (API Secret)'].strip()
 access_token = codes['Access Token'].strip()
@@ -186,6 +206,8 @@ auth = tweepy.OAuthHandler(api_key,api_secret)
 auth.set_access_token(access_token,token_secret)
 api = tweepy.API(auth)
 my_twitter = api.me()
+
+print load_servos_info_from_page(servo_page)
 
 print my_twitter.name, "is connected"
 tweet_text=['Test shot of birds station',
@@ -202,6 +224,8 @@ numberOfPictures = 0
 
 pattern = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
 shot_to_publish(pattern)
+
+
 
 while go==1:
 	if numberOfPictures > 100:
