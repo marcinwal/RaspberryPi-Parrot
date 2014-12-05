@@ -90,7 +90,7 @@ def detect_if_move(old_path):
 		camera.capture(tmp)
 	p2 = Image.open(tmp)	
 
-	print("w,h %i %i" % (w,h))
+	#print("w,h %i %i" % (w,h))
 
 	#diff = np.subtract(p1,p2)
 	#total = np.sum(diff)
