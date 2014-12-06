@@ -47,14 +47,15 @@ def kill_servos():
 def servo_adjust_pct(servo,adjust):
         os.system("echo "+(servo)+"="+(adjust)+" > /dev/servoblaster")
        
-def move_tilt_pct():    
+def move_tilt_pct(command,command2):    
         start()
 	sleep(5)
-        command=(raw_input("how much to move the servo 0 in pc "))
+        #command=(raw_input("how much to move the servo 0 in pc "))
         servo_adjust_pct("0",command)
-        command2=(raw_input("how much to move servo 1  in pct "))
+        #command2=(raw_input("how much to move servo 1  in pct "))
         servo_adjust_pct("1",command2)
         kill_servos()
+
 
 def move_tilt_value():
 	start()
@@ -207,11 +208,11 @@ auth.set_access_token(access_token,token_secret)
 api = tweepy.API(auth)
 my_twitter = api.me()
 
-print load_servos_info_from_page(servo_page)
+servo1,servo2 = load_servos_info_from_page(servo_page) #loading servos settings from the page
 
-print my_twitter.name, "is connected"
-tweet_text=['Test shot of birds station',
-	    'Move detected with rPi']
+#print my_twitter.name, "is connected"
+#tweet_text=['Test shot of birds station',
+#	    'Move detected with rPi']
 
 
 #move_tilt_pct()
@@ -242,5 +243,11 @@ while go==1:
 		numberOfPictures += 1
 	   sleep(300) 	
 	#move_tilt_pct()
-	
+        s1,s2 = load_servos_info_from_page(servo_page)
+        if (s1 != servo1) or (s2 != servo2):
+             servo1, servo2 = s1, s2
+             print s1,s2
+             move_tilt_pct(s1,s2)
+             
+             	
 
