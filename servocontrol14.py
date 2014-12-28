@@ -238,7 +238,7 @@ while go==1:
 	   for i in xrange(1,5):  #takes 5 picstures if move is detected				
 		shot_name = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
                 shot_to_publish(shot_name)
-		#update_twitter(shot_name,"detection")
+		update_twitter(shot_name,"detection")
 		sleep(10)
 		numberOfPictures += 1
 	   sleep(300) 	
