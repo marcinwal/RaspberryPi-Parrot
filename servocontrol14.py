@@ -23,49 +23,49 @@ tweepy_codes_path="tweepy_codes.txt"
 how_often_detection_test=6 #testing motion
 
 def start():
-        print("starting servo")
-        os.system("sudo /home/pi/PiBits/ServoBlaster/user/servod")
+  print("starting servo")
+  os.system("sudo /home/pi/PiBits/ServoBlaster/user/servod")
 
 
         
 def call_command(servo,pulsewidth):
-	print("echo "+str(servo)+"="+pulsewidth+" > /dev/servoblaster")
-        os.system("echo "+str(servo)+"="+pulsewidth+" > /dev/servoblaster")
+  print("echo "+str(servo)+"="+pulsewidth+" > /dev/servoblaster")
+  os.system("echo "+str(servo)+"="+pulsewidth+" > /dev/servoblaster")
 
 def servo_adjust_plus(servo,adjust): #+10,+20
-        os.system("echo "+servo+"=+"+adjust+" > /dev/servoblaster")
-        print("executing:"+"echo "+servo+"=+"+adjust+" > /dev/servoblaster")
+  os.system("echo "+servo+"=+"+adjust+" > /dev/servoblaster")
+  print("executing:"+"echo "+servo+"=+"+adjust+" > /dev/servoblaster")
 
 def servo_adjust_minus(servo,adjust):   
-        os.system("echo "+servo+"=-"+adjust+" > /dev/servoblaster")
-        print("executing:"+"echo "+servo+"=-"+adjust+" > /dev/servoblaster")
+  os.system("echo "+servo+"=-"+adjust+" > /dev/servoblaster")
+  print("executing:"+"echo "+servo+"=-"+adjust+" > /dev/servoblaster")
         
 def kill_servos():
-        os.system("sudo killall servod")
+  os.system("sudo killall servod")
         
 
 def servo_adjust_pct(servo,adjust):
-        os.system("echo "+(servo)+"="+(adjust)+" > /dev/servoblaster")
+  os.system("echo "+(servo)+"="+(adjust)+" > /dev/servoblaster")
        
 def move_tilt_pct(command,command2):    
-        start()
-	sleep(5)
-        #command=(raw_input("how much to move the servo 0 in pc "))
-        servo_adjust_pct("0",command)
-        #command2=(raw_input("how much to move servo 1  in pct "))
-        servo_adjust_pct("1",command2)
-        kill_servos()
+  start()
+  sleep(5)
+  #command=(raw_input("how much to move the servo 0 in pc "))
+  servo_adjust_pct("0",command)
+  #command2=(raw_input("how much to move servo 1  in pct "))
+  servo_adjust_pct("1",command2)
+  kill_servos()
 
 
 def move_tilt_value():
-	start()
-	sleep(5)
-	command=(raw_input("how much to move the servo 0 in pts "))
-	print(command)
-	call_command(0,command)
-	command=(raw_input("how much to move the servo 1 in pts "))
-	call_command(1,command)
-	kill_servos()
+  start()
+  sleep(5)
+  command=(raw_input("how much to move the servo 0 in pts "))
+  print(command)
+  call_command(0,command)
+  command=(raw_input("how much to move the servo 1 in pts "))
+  call_command(1,command)
+  kill_servos()
 
 def take_a_photo(path):
         with picamera.PiCamera() as camera:
@@ -80,62 +80,61 @@ def take_a_photo(path):
 #should be the same resolution
 
 def detect_if_move(old_path):
-
-	p1 = Image.open(old_path) #loading pattern
-	tmp = "test.jpg"
- 	w,h = p1.size
+  p1 = Image.open(old_path) #loading pattern
+  tmp = "test.jpg"
+  w,h = p1.size
 
 	#picture.show()
 
-	with picamera.PiCamera() as camera:  #taking new shot
-		camera.resolution = (w,h)
-		sleep(2)
-		camera.capture(tmp)
-	p2 = Image.open(tmp)	
+  with picamera.PiCamera() as camera:  #taking new shot
+    camera.resolution = (w,h)
+    sleep(2)
+    camera.capture(tmp)
+
+  p2 = Image.open(tmp)	
 
 	#print("w,h %i %i" % (w,h))
 
 	#diff = np.subtract(p1,p2)
 	#total = np.sum(diff)
 
-	h1=p1.histogram()
-	h2=p2.histogram()
+  h1=p1.histogram()
+  h2=p2.histogram()
 
-	rms = math.sqrt(reduce(operator.add,
-		map(lambda a,b: (a-b)**2, h1,h2))/len(h1))
+  rms = math.sqrt(reduce(operator.add,map(lambda a,b: (a-b)**2, h1,h2))/len(h1))
 
-	return (rms,tmp)
+  return (rms,tmp)
 
 def easy_shot(path,camera):
-	camera.capture(path,resize=(1024,768))
+  camera.capture(path,resize=(1024,768))
 	#print"taking a picture %s \n" % path 
 
 def shot_to_publish(path,w=1024,h=768):
-	with picamera.PiCamera() as camera:  #taking new shot
-		camera.resolution = (w,h)
-		sleep(2)
-		camera.capture(path)
+  with picamera.PiCamera() as camera:  #taking new shot
+    camera.resolution = (w,h)
+    sleep(2)
+    camera.capture(path)
 		
 
 
 def compare(camera):
-	camera.resolution=(res1,res2)
-	stream = io.BytesIO()
-	camera.capture(stream,format='bmp') 
-	stream.seek(0)
-	im = Image.open(stream)
-	buffer = im.load()
-	stream.close()
-	return buffer
+  camera.resolution=(res1,res2)
+  stream = io.BytesIO()
+  camera.capture(stream,format='bmp') 
+  stream.seek(0)
+  im = Image.open(stream)
+  buffer = im.load()
+  stream.close()
+  return buffer
 
 def count_diff(buffer):
-	diff = 0 
-	for x in xrange(0,res1):
-	   for y in xrange(0,res2):
-		px_diff = abs(buffer[0][x,y][1]-buffer[1][x,y][1])
-		if px_diff > treshold:
-			diff += 1
-	return diff
+  diff = 0 
+  for x in xrange(0,res1):
+    for y in xrange(0,res2):
+      px_diff = abs(buffer[0][x,y][1]-buffer[1][x,y][1])
+      if px_diff > treshold:
+        diff += 1
+  return diff
 
   
 #detection of the move using stream                
@@ -171,10 +170,9 @@ def load_tweepy_codes(path):
 		codes[tmp[0]]=tmp[1]
 	return codes
 
-def update_twitter(photo_path,comment):
-	api.update_with_media(photo_path,status=comment)
-	
-                         
+def update_twitter(photo_path):
+	api.update_with_media(photo_path,status = 'detection')
+
 def load_servos_info_from_page(page):
 	sock = urllib.urlopen(page)
 	html = sock.read()
@@ -229,25 +227,24 @@ shot_to_publish(pattern)
 
 
 while go==1:
-	if numberOfPictures > 100:
-		break
-	diff, path = detect_if_move(pattern)	
-        sleep(how_often_detection_test)
-	#print(diff)
-	if diff > 3000:
-	   for i in xrange(1,5):  #takes 5 picstures if move is detected				
-		shot_name = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
-                shot_to_publish(shot_name)
-		update_twitter(shot_name,"detection")
-		sleep(10)
-		numberOfPictures += 1
-	   sleep(300) 	
-	#move_tilt_pct()
-        s1,s2 = load_servos_info_from_page(servo_page)
-        if (s1 != servo1) or (s2 != servo2):
-             servo1, servo2 = s1, s2
-             print s1,s2
-             move_tilt_pct(s1,s2)
+  if numberOfPictures > 100:
+    break
+  diff, path = detect_if_move(pattern)	
+  sleep(how_often_detection_test)
+  if diff > 3000:
+    for i in xrange(1,5):  #takes 5 picstures if move is detected				
+      shot_name = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
+      shot_to_publish(shot_name)
+      api.update_with_media(shot_name,status = 'detection')
+      # update_twitter(api,shot_name)
+      sleep(10)
+      numberOfPictures += 1
+    sleep(300)
+  s1,s2 = load_servos_info_from_page(servo_page)
+  if (s1 != servo1) or (s2 != servo2):
+    servo1, servo2 = s1, s2
+    print s1,s2
+    move_tilt_pct(s1,s2)
              
              	
 
