@@ -170,8 +170,8 @@ def load_tweepy_codes(path):
 		codes[tmp[0]]=tmp[1]
 	return codes
 
-def update_twitter(photo_path):
-	api.update_with_media(photo_path,status = 'detection')
+def update_twitter(photo_path,comment = 'detection'):
+	api.update_with_media(photo_path,status = comment)
 
 def load_servos_info_from_page(page):
 	sock = urllib.urlopen(page)
@@ -185,9 +185,6 @@ def load_servos_info_from_page(page):
 	s2 = serv2[-1].split(':')
 
 	return s1[1],s2[1]
-
-
-
 
 
 
@@ -208,7 +205,7 @@ my_twitter = api.me()
 
 servo1,servo2 = load_servos_info_from_page(servo_page) #loading servos settings from the page
 
-#print my_twitter.name, "is connected"
+print my_twitter.name, "is connected"
 #tweet_text=['Test shot of birds station',
 #	    'Move detected with rPi']
 
@@ -227,16 +224,17 @@ shot_to_publish(pattern)
 
 
 while go==1:
-  if numberOfPictures > 100:
+  if numberOfPictures > 50:
     break
   diff, path = detect_if_move(pattern)	
   sleep(how_often_detection_test)
   if diff > 3000:
-    for i in xrange(1,5):  #takes 5 picstures if move is detected				
+    for i in xrange(1,5):  #takes 5 picstures if move is detected
+      time_event = strftime("%Y-%m-%d %H:%M:%S",gmtime())				
       shot_name = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
       shot_to_publish(shot_name)
-      api.update_with_media(shot_name,status = 'detection')
-      # update_twitter(api,shot_name)
+      #api.update_with_media(shot_name,status = 'detection')
+      update_twitter(shot_name,"picture taken in the garden by RasPi")
       sleep(10)
       numberOfPictures += 1
     sleep(300)
