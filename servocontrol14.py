@@ -79,28 +79,31 @@ def take_a_photo(path):
 #loads old picture takes a new one, compares with trshold and b/e and sends a signal
 #should be the same resolution
 
+def compare_with_pattern(path1,path2):
+  p1 = Image.open(path1)
+  p2 = Image.open(path2)
+  h1 = p1.histogram()
+  h2 = p2.histogram()
+
+  rms = math.sqrt(reduce(operator.add,map(lambda a,b: (a-b)**2, h1,h2))/len(h1))
+
+  return rms
+
 def detect_if_move(old_path):
   p1 = Image.open(old_path) #loading pattern
   tmp = "test.jpg"
   w,h = p1.size
-
 	#picture.show()
-
   with picamera.PiCamera() as camera:  #taking new shot
     camera.resolution = (w,h)
     sleep(2)
     camera.capture(tmp)
-
   p2 = Image.open(tmp)	
-
 	#print("w,h %i %i" % (w,h))
-
 	#diff = np.subtract(p1,p2)
 	#total = np.sum(diff)
-
   h1=p1.histogram()
   h2=p2.histogram()
-
   rms = math.sqrt(reduce(operator.add,map(lambda a,b: (a-b)**2, h1,h2))/len(h1))
 
   return (rms,tmp)
@@ -110,6 +113,7 @@ def easy_shot(path,camera):
 	#print"taking a picture %s \n" % path 
 
 def shot_to_publish(path,w=1024,h=768):
+  print "shooting to publish"
   with picamera.PiCamera() as camera:  #taking new shot
     camera.resolution = (w,h)
     sleep(2)
@@ -159,6 +163,7 @@ def detect_and_save(how_many=10):
 			count += 1
 			#break
 		sleep(10)
+
 
 def load_tweepy_codes(path):
 	codes={}
@@ -214,13 +219,20 @@ print my_twitter.name, "is connected"
 #move_tilt_value()
 
 go=1
+diff_threshold = 1250
 
-sleep(60)
+sleep(10)
 numberOfPictures = 0 
 
 pattern = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
 shot_to_publish(pattern)
+print "patter taken as " + pattern
+to_twitter = False
 
+input_read = raw_input("Sending to twitter y/n?")
+if input_read == 'y':
+  to_twitter = True
+print "\n %r" %to_twitter
 
 
 while go==1:
@@ -228,19 +240,27 @@ while go==1:
     break
   diff, path = detect_if_move(pattern)	
   sleep(how_often_detection_test)
-  if diff > 3000:
+  print "diff is " + str(diff)
+  if diff > diff_threshold:
     for i in xrange(1,5):  #takes 5 picstures if move is detected
+      print "motion detected"
       time_event = strftime("%Y-%m-%d %H:%M:%S",gmtime())				
       shot_name = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
       shot_to_publish(shot_name)
-      #api.update_with_media(shot_name,status = 'detection')
-      update_twitter(shot_name,"picture taken in the garden by RasPi")
-      sleep(10)
+      #api.update_with_media(shot_name,status = 'detection')      
+      diff_result = compare_with_pattern(pattern,shot_name)
+      print "diff = %d" %diff_result 
+      if ( diff_result > diff_threshold) and (to_twitter):
+        print "updating twitter with " + shot_name
+        update_twitter(shot_name,"picture taken in the garden by RasPi")
+        sleep(10)
+
       numberOfPictures += 1
     sleep(300)
   s1,s2 = load_servos_info_from_page(servo_page)
   if (s1 != servo1) or (s2 != servo2):
     servo1, servo2 = s1, s2
+    print "moving servos"
     print s1,s2
     move_tilt_pct(s1,s2)
              
