@@ -219,21 +219,22 @@ print my_twitter.name, "is connected"
 #move_tilt_value()
 
 go=1
-diff_threshold = 1250
+diff_threshold = 1550
 
-sleep(10)
+sleep(60)
 numberOfPictures = 0 
 
 pattern = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
 shot_to_publish(pattern)
 print "patter taken as " + pattern
-to_twitter = False
+# to_twitter = False
 
-input_read = raw_input("Sending to twitter y/n?")
-if input_read == 'y':
-  to_twitter = True
-print "\n %r" %to_twitter
+# input_read = raw_input("Sending to twitter y/n?")
+# if input_read == 'y':
+#   to_twitter = True
+# print "\n %r" %to_twitter
 
+to_twitter = True
 
 while go==1:
   if numberOfPictures > 50:
