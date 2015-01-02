@@ -8,9 +8,9 @@ import sys
 from PIL import Image
 import math,operator
 import tweepy
-import urllib
 import re
-
+import RPi.GPIO as GPIO
+import urllib
 #import numpy as np
 
 width = 1280
@@ -21,13 +21,15 @@ res2 = 75   # y resolution for compare
 trigger = 100
 tweepy_codes_path="tweepy_codes.txt"
 how_often_detection_test=6 #testing motion
+pir = 18 #pin 18th as IN for sensoe
+
+
+
 
 def start():
   print("starting servo")
   os.system("sudo /home/pi/PiBits/ServoBlaster/user/servod")
 
-
-        
 def call_command(servo,pulsewidth):
   print("echo "+str(servo)+"="+pulsewidth+" > /dev/servoblaster")
   os.system("echo "+str(servo)+"="+pulsewidth+" > /dev/servoblaster")
@@ -97,9 +99,6 @@ def detect_if_move(old_path):
     sleep(2)
     camera.capture(tmp)
   p2 = Image.open(tmp)	
-	#print("w,h %i %i" % (w,h))
-	#diff = np.subtract(p1,p2)
-	#total = np.sum(diff)
   h1=p1.histogram()
   h2=p2.histogram()
   rms = math.sqrt(reduce(operator.add,map(lambda a,b: (a-b)**2, h1,h2))/len(h1))
@@ -178,18 +177,26 @@ def update_twitter(photo_path,comment = 'detection'):
 
 #loading servos information form the page
 def load_servos_info_from_page(page):
-	sock = urllib.urlopen(page)
-	html = sock.read()
-	sock.close()
+  sock = urllib.urlopen(page)
+  html = sock.read()
+  sock.close()
 
-	serv1 = re.findall("Servo1:[-+%]?\d+",html)
-	serv2 = re.findall("Servo2:[-+%]?\d+",html)
+  serv1 = re.findall("Servo1:[-+%]?\d+",html)
+  serv2 = re.findall("Servo2:[-+%]?\d+",html)
 
-	s1 = serv1[-1].split(':')
-	s2 = serv2[-1].split(':')
+  s1 = serv1[-1].split(':')
+  s2 = serv2[-1].split(':')
 
-	return s1[1],s2[1]
+  return s1[1],s2[1]
 
+
+def motion_detected(pir):
+  time_event = strftime("%Y-%m-%d %H:%M:%S",gmtime())       
+  shot_name = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'  
+  shot_to_publish(shot_name)
+  numberOfPictures += 1
+  if to_twitter:
+    update_twitter(shot_name,"picture taken in the garden by RasPi " + time_event[11:])
 
 
 
@@ -209,31 +216,24 @@ my_twitter = api.me()
 
 servo1,servo2 = load_servos_info_from_page(servo_page) #loading servos settings from the page
 
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(pir,GPIO.IN)
+
 print my_twitter.name, "is connected"
 #tweet_text=['Test shot of birds station',
 #	    'Move detected with rPi']
-
-
 #move_tilt_pct()
 #move_tilt_value()
-
-
-
-
-
 sleep(60)
 numberOfPictures = 0 
-
 pattern = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
 # to_twitter = False
-
 # input_read = raw_input("Sending to twitter y/n?")
 # if input_read == 'y':
 #   to_twitter = True
 # print "\n %r" %to_twitter
-
-to_twitter = True
-sleep(how_often_detection_test)
+to_twitter = False
+#sleep(how_often_detection_test)
 # for i in xrange(1,5):  #takes 5 picstures if move is detected
 #   print "motion detected"
       # time_event = strftime("%Y-%m-%d %H:%M:%S",gmtime())				
@@ -241,13 +241,23 @@ sleep(how_often_detection_test)
       # shot_to_publish(shot_name)
       # update_twitter(shot_name,"picture taken in the garden by RasPi")
       # sleep(10)
-      
-  s1,s2 = load_servos_info_from_page(servo_page)
-  if (s1 != servo1) or (s2 != servo2):
-    servo1, servo2 = s1, s2
-    print "moving servos"
-    print s1,s2
-    move_tilt_pct(s1,s2)
-             
+try:
+  GPIO.add_event_detect(pir,GPIO.RISING,callback = motion_detected) 
+  while True:
+    time.sleep(60)
+    s1,s2 = load_servos_info_from_page(servo_page)
+    if (s1 != servo1) or (s2 != servo2):
+      servo1, servo2 = s1, s2
+      print "moving servos"
+      print s1,s2
+      move_tilt_pct(s1,s2)
+except KeyboardInterrupt:
+  print "Ending.."
+finally:
+  camera.close()
+  GPIO.cleanup()
+  kill_servos()
+
+               
              	
 
