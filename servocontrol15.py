@@ -198,6 +198,12 @@ def motion_detected(pir):
     update_twitter(shot_name,"picture taken in the garden by RasPi " + time_event[11:])
 
 
+#extracts a bird from a giive picure
+def extract_bird(path): 
+
+#fun with picture
+def picture_derivative(path):
+
 
 codes = load_tweepy_codes(tweepy_codes_path)
 
@@ -250,7 +256,7 @@ try:
     s1,s2 = load_servos_info_from_page(servo_page)
     if (s1 != servo1) or (s2 != servo2):
       servo1, servo2 = s1, s2
-      print "moving servos"
+      print "moving servos by percentage"
       print s1,s2
       move_tilt_pct(s1,s2)
 except KeyboardInterrupt:
