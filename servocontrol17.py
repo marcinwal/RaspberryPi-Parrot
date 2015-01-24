@@ -190,7 +190,7 @@ def motion_detected(pir):
   time_event = strftime("%Y-%m-%d %H:%M:%S",gmtime())       
   shot_name = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'  
   shot_to_publish(shot_name)
-  print("motion detected %d",numberOfPictures)
+  print "motion detected number %d" %(numberOfPictures)
   numberOfPictures += 1
   if to_twitter:
     update_twitter(shot_name,"picture taken in the garden by RasPi " + time_event[11:])
@@ -202,7 +202,7 @@ def extract_bird(path):
 
 #fun with picture
 def picture_derivative(path):
- print 'calulating'
+  print 'calulating'
 
 codes = load_tweepy_codes(tweepy_codes_path)
 
@@ -223,6 +223,16 @@ camera.led = False #led on the camera
 
 servo1,servo2 = load_servos_info_from_page(servo_page) #loading servos settings from the page
 
+to_twitter = False
+input_read = raw_input("Sending to twitter y/n?")
+if input_read == 'y':
+  to_twitter = True
+
+input_read = raw_input("Start the process?")
+if input_read == 'y':
+  print 'starting shooting machine'
+
+
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(pir,GPIO.IN)
@@ -230,9 +240,6 @@ print 'setting up GPIO'
 
 print my_twitter.name, "is connected"
 sleep(10)
-
-pattern = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
-to_twitter = False
 
 try:
   GPIO.add_event_detect(pir,GPIO.RISING,callback = motion_detected)
@@ -244,7 +251,3 @@ except KeyboardInterrupt:
 finally:
   camera.close()
   GPIO.cleanup()
-
-               
-             	
-
