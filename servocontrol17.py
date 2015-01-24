@@ -186,10 +186,11 @@ def load_servos_info_from_page(page):
 
 
 def motion_detected(pir):
+  global numberOfPictures 
   time_event = strftime("%Y-%m-%d %H:%M:%S",gmtime())       
   shot_name = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'  
   shot_to_publish(shot_name)
-  print 'motion detected'
+  print("motion detected %d",numberOfPictures)
   numberOfPictures += 1
   if to_twitter:
     update_twitter(shot_name,"picture taken in the garden by RasPi " + time_event[11:])
@@ -211,7 +212,7 @@ api_secret = codes['Consumer Secret (API Secret)'].strip()
 access_token = codes['Access Token'].strip()
 token_secret = codes['Access Token Secret'].strip()
 
-
+numberOfPictures = 0 
 auth = tweepy.OAuthHandler(api_key,api_secret)
 auth.set_access_token(access_token,token_secret)
 api = tweepy.API(auth)
@@ -222,7 +223,7 @@ camera.led = False #led on the camera
 
 servo1,servo2 = load_servos_info_from_page(servo_page) #loading servos settings from the page
 
-numberOfPictures = 0 
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(pir,GPIO.IN)
 print 'setting up GPIO'
