@@ -15,13 +15,9 @@ import urllib
 
 width = 1280
 heigth = 960
-treshold = 20 # trigger for change detection
-res1 = 100  # x resolution for compare
-res2 = 75   # y resolution for compare	
 trigger = 100
 tweepy_codes_path="tweepy_codes.txt"
-how_often_detection_test=6 #testing motion
-pir = 14 #pin 18th as IN for sensor
+pir = 14 #pin 14
 
 
 
@@ -193,17 +189,19 @@ def motion_detected(pir):
   time_event = strftime("%Y-%m-%d %H:%M:%S",gmtime())       
   shot_name = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'  
   shot_to_publish(shot_name)
+  print 'motion detected'
   numberOfPictures += 1
   if to_twitter:
     update_twitter(shot_name,"picture taken in the garden by RasPi " + time_event[11:])
 
 
 #extracts a bird from a give picure
-def extract_bird(path): 
+def extract_bird(path):
+  print 'looking for a patter bird' 
 
 #fun with picture
 def picture_derivative(path):
-
+ print 'calulating'
 
 codes = load_tweepy_codes(tweepy_codes_path)
 
@@ -224,47 +222,27 @@ camera.led = False #led on the camera
 
 servo1,servo2 = load_servos_info_from_page(servo_page) #loading servos settings from the page
 
+numberOfPictures = 0 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(pir,GPIO.IN)
+print 'setting up GPIO'
 
 print my_twitter.name, "is connected"
-#tweet_text=['Test shot of birds station',
-#	    'Move detected with rPi']
-#move_tilt_pct()
-#move_tilt_value()
-sleep(60)
-numberOfPictures = 0 
+sleep(10)
+
 pattern = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
 to_twitter = False
-# input_read = raw_input("Sending to twitter y/n?")
-# if input_read == 'y':
-#   to_twitter = True
-# print "\n %r" %to_twitter
-to_twitter = False
-#sleep(how_often_detection_test)
-# for i in xrange(1,5):  #takes 5 picstures if move is detected
-#   print "motion detected"
-      # time_event = strftime("%Y-%m-%d %H:%M:%S",gmtime())				
-      # shot_name = strftime("%Y-%m-%d %H:%M:%S",gmtime())+'.jpg'
-      # shot_to_publish(shot_name)
-      # update_twitter(shot_name,"picture taken in the garden by RasPi")
-      # sleep(10)
+
 try:
-  GPIO.add_event_detect(pir,GPIO.RISING,callback = motion_detected) 
+  GPIO.add_event_detect(pir,GPIO.RISING,callback = motion_detected)
   while True:
-    sleep(60)
-    s1,s2 = load_servos_info_from_page(servo_page)
-    #if (s1 != servo1) or (s2 != servo2):
-    #  servo1, servo2 = s1, s2
-    #  print "moving servos by percentage"
-    #  print s1,s2
-    #  move_tilt_pct(s1,s2)
+    sleep(10)
+    print 'sleeping'
 except KeyboardInterrupt:
   print "Ending.."
 finally:
   camera.close()
   GPIO.cleanup()
-  #kill_servos()
 
                
              	
