@@ -198,7 +198,7 @@ def motion_detected(pir):
 
 #extracts a bird from a give picure
 def extract_bird(path):
-  print 'looking for a patter bird' 
+  print 'looking for a pattern bird' 
 
 #fun with picture
 def picture_derivative(path):
@@ -221,7 +221,7 @@ my_twitter = api.me()
 camera = picamera.PiCamera()
 camera.led = False #led on the camera
 
-servo1,servo2 = load_servos_info_from_page(servo_page) #loading servos settings from the page
+#servo1,servo2 = load_servos_info_from_page(servo_page) #loading servos settings from the page
 
 to_twitter = False
 input_read = raw_input("Sending to twitter y/n?")
@@ -244,7 +244,7 @@ sleep(10)
 try:
   GPIO.add_event_detect(pir,GPIO.RISING,callback = motion_detected)
   while True:
-    sleep(10)
+    sleep(20)
     print 'sleeping'
 except KeyboardInterrupt:
   print "Ending.."
